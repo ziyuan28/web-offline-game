@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的挂机小游戏</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; text-align: center; background-color: #f0f0f0; padding-top: 50px; }
+        .container { background: white; width: 300px; margin: 0 auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .currency { font-size: 24px; color: #d35400; margin: 20px 0; }
+        button { cursor: pointer; padding: 10px 20px; font-size: 16px; margin: 5px; background-color: #3498db; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #log { margin-top: 20px; font-size: 12px; color: #666; height: 100px; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>挂机矿工</h1>
+    
+    <div class="currency">金币: <span id="goldDisplay">0</span></div>
+    <div>每秒产量: <span id="gpsDisplay">0</span></div>
+
+    <br>
+    <button onclick="clickMine()">手动挖矿 (+1)</button>
+    <br><br>
+    <button id="btnUpgrade" onclick="buyAutoMiner()">雇佣矿工 (消耗 10 金币)</button>
+
+    <div id="log"></div>
+    <br>
+    <button onclick="hardReset()" style="background-color: #c0392b; font-size: 12px;">重置存档</button>
+</div>
+
+<script>
+    // 1. 游戏默认数据结构
+    let game = {
+        gold: 0,
+        miners: 0,
+        minerCost: 10,
+        lastSaveTime: Date.now() // 用于计算离线时间
+    };
+
+    // 2. 初始化：读取存档
+    function loadGame() {
+        const savedGame = localStorage.getItem('myIdleGameSave');
+        if (savedGame) {
+            const parsedGame = JSON.parse(savedGame);
+            // 合并存档（防止增加新变量后旧存档报错）
+            game = { ...game, ...parsedGame }; 
+            calculateOfflineProgress(); // 关键：计算离线收益
+        }
+    }
+
+    // 3. 核心功能：计算离线收益
+    function calculateOfflineProgress() {
+        const now = Date.now();
+        // 毫秒转秒
+        const secondsOffline = (now - game.lastSaveTime) / 1000;
+        
+        if (secondsOffline > 10 && game.miners > 0) {
+            const earned = Math.floor(secondsOffline * game.miners);
+            game.gold += earned;
+            log(`欢迎回来！你离线了 ${secondsOffline.toFixed(1)} 秒，获得了 ${earned} 金币。`);
+        }
+    }
+
+    // 4. 游戏主循环 (每秒执行一次)
+    setInterval(() => {
+        // 增加被动收益
+        game.gold += game.miners;
+        // 更新 UI
+        updateUI();
+        // 自动存档
+        saveGame();
+    }, 1000);
+
+    // 5. 存档功能
+    function saveGame() {
+        game.lastSaveTime = Date.now(); // 记录当前时间用于下次离线计算
+        localStorage.setItem('myIdleGameSave', JSON.stringify(game));
+    }
+
+    // --- 玩家操作逻辑 ---
+
+    function clickMine() {
+        game.gold++;
+        updateUI();
+    }
+
+    function buyAutoMiner() {
+        if (game.gold >= game.minerCost) {
+            game.gold -= game.minerCost;
+            game.miners++;
+            game.minerCost = Math.floor(game.minerCost * 1.5); // 价格递增
+            log("雇佣了一名矿工！");
+            updateUI();
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('goldDisplay').innerText = game.gold;
+        document.getElementById('gpsDisplay').innerText = game.miners;
+        document.getElementById('btnUpgrade').innerText = `雇佣矿工 (消耗 ${game.minerCost} 金币)`;
+        
+        // 按钮置灰逻辑
+        document.getElementById('btnUpgrade').disabled = (game.gold < game.minerCost);
+    }
+
+    function log(msg) {
+        const logEl = document.getElementById('log');
+        logEl.innerHTML = `<div>${msg}</div>` + logEl.innerHTML;
+    }
+
+    function hardReset() {
+        if(confirm("确定要删除存档从头开始吗？")) {
+            localStorage.removeItem('myIdleGameSave');
+            location.reload();
+        }
+    }
+
+    // 启动游戏
+    loadGame();
+    updateUI();
+
+</script>
+</body>
+</html>
