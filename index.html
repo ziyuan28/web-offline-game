@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>灵石修仙传 - 机缘修复版</title>
+    <title>灵石修仙传 - 百态修仙版</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -110,13 +110,19 @@
         .log-container::-webkit-scrollbar { width: 6px; }
         .log-container::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
         .log-time { color: #555; margin-right: 8px; }
+        
+        /* 不同的日志颜色 */
+        .log-gain { color: var(--green); }
+        .log-loss { color: var(--red); }
+        .log-info { color: #aaa; }
+        .log-gold { color: var(--gold); }
 
         @keyframes breathe {
             0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--blue); opacity: 0.9; }
             50% { transform: scale(1.05); box-shadow: 0 0 70px var(--purple); opacity: 1; }
         }
 
-        /* Modal (弹窗修复) */
+        /* Modal */
         #event-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 200;
@@ -148,7 +154,6 @@
             
             <div style="height:1px; background:#333; margin:10px 0;"></div>
             
-            <!-- 机缘倒计时移到这里，更加醒目 -->
             <div class="stat-row" style="color:#aaa;">
                 <span>机缘倒计时</span>
                 <span id="event-timer" style="color:var(--red); font-weight:bold;">30</span>
@@ -166,7 +171,6 @@
                 <div class="progress-bar"><div class="progress-fill" id="exp-bar"></div></div>
             </div>
 
-            <!-- 护身符状态 -->
             <div id="amulet-status" style="font-size:12px; color:var(--green); margin-bottom:10px; display:none; text-align:center;">
                 🛡️ 护身符生效中 (失败不掉级)
             </div>
@@ -186,22 +190,19 @@
             <!-- Tab: 洞府 -->
             <div id="view-cave" class="view-content">
                 <div class="scene-area" id="scene-area">
-                    <!-- 点击事件传递 event 参数以获取坐标 -->
                     <div class="spirit-orb" onmousedown="game.manualCultivate(event)">道</div>
                     <div style="position: absolute; bottom: 20px; font-size: 14px; color: #888;">
                         点击吞吐灵气
                     </div>
                 </div>
                 <div style="text-align:center; color:#555; font-size:12px; font-style:italic;">
-                    “机缘倒计时已移至左侧面板。”
+                    “万般皆下品，唯有修仙高。”
                 </div>
             </div>
 
             <!-- Tab: 坊市 -->
             <div id="view-market" class="view-content hidden">
-                <div class="market-grid" id="market-list">
-                    <!-- JS 动态生成商品 -->
-                </div>
+                <div class="market-grid" id="market-list"></div>
             </div>
         </div>
     </div>
@@ -212,7 +213,7 @@
     </div>
 </div>
 
-<!-- 随机事件弹窗 (已修复) -->
+<!-- 随机事件弹窗 -->
 <div id="event-modal">
     <div class="modal-content">
         <h2 style="color:var(--red); margin-top:0;" id="modal-title">奇遇</h2>
@@ -224,8 +225,8 @@
 <script>
     /* --- 1. 配置与数据 --- */
     const CONFIG = {
-        realms: ["凡人", "炼气初期", "炼气中期", "炼气后期", "筑基期", "金丹大道", "元婴老祖", "化神天尊", "炼虚合道"],
-        eventInterval: 300 // 300秒触发一次机缘
+        realms: ["凡人", "炼气初期", "炼气中期", "炼气后期", "筑基期", "金丹大道", "元婴老祖", "化神天尊", "炼虚合道", "大乘渡劫", "陆地神仙"],
+        eventInterval: 30 // 30秒一次
     };
 
     const defaultState = {
@@ -241,45 +242,152 @@
     let state = { ...defaultState };
     let eventTimer = CONFIG.eventInterval;
 
-    /* --- 2. 随机事件库 (修复并回归) --- */
+    /* --- 2. 扩充的随机事件库 (15+ 个事件) --- */
+    // Helper: 检查是否有足够灵石
+    const checkGold = (val) => state.gold >= val;
+    
     const EVENTS = [
+        // --- 基础福利类 ---
         {
-            t: "乞丐的馈赠",
-            d: "路边一个乞丐非要塞给你一本破书，说你是万中无一的练武奇才。",
+            t: "路遇乞丐",
+            d: "一个疯疯癫癫的老头拦住你，非要送你一本破书。",
             opts: [
-                { txt: "接受 (+100修为)", act: (g) => { g.addExp(100); return "破书竟然是残缺的心法！修为大增。"; } },
-                { txt: "嫌脏走开", act: (g) => { return "你错过了机缘。"; } }
+                { txt: "收下看看", act: (g) => { g.addExp(100); return {msg:"破书竟是残缺心法，修为+100！", cls:"log-gain"}; } },
+                { txt: "嫌脏走开", act: (g) => { return {msg:"你错过了机缘。", cls:"log-info"}; } }
             ]
         },
         {
             t: "天降横财",
-            d: "你在后山闲逛，被一块突出的石头绊倒，仔细一看...",
+            d: "你在后山被石头绊倒，挖开一看...",
             opts: [
-                { txt: "挖开看看 (+100灵石)", act: (g) => { state.gold+=100; return "竟然是一块下品灵石！发财了。"; } }
+                { txt: "挖开", act: (g) => { state.gold+=100; return {msg:"竟是一块下品灵石！灵石+100", cls:"log-gold"}; } }
             ]
         },
+        
+        // --- 赌博/交易类 ---
         {
-            t: "心魔试炼",
-            d: "打坐时忽感心神不宁，似有天魔乱舞。",
+            t: "赌石大会",
+            d: "坊市正在举办赌石，每块原石售价 200 灵石。",
             opts: [
-                { txt: "凝神静气 (50%概率+300修为)", act: (g) => { 
-                    if(Math.random()>0.5) { g.addExp(300); return "战胜心魔，道心更加稳固！"; }
-                    else { g.addExp(-50); return "心神受损，损失了少量修为。"; }
+                { txt: "买一块 (200灵石)", act: (g) => { 
+                    if(!checkGold(200)) return {msg:"灵石不足！", cls:"log-loss"};
+                    state.gold -= 200;
+                    const rnd = Math.random();
+                    if(rnd > 0.8) { state.gold += 1000; return {msg:"切出了极品玉髓！灵石+1000", cls:"log-gold"}; }
+                    if(rnd > 0.5) { state.gold += 300; return {msg:"切出了普通灵玉。灵石+300", cls:"log-gold"}; }
+                    return {msg:"全是废料，血本无归。", cls:"log-loss"};
                 }},
-                { txt: "立刻停止", act: (g) => { return "你及时收功，无事发生。"; } }
+                { txt: "看看就好", act: (g) => { return {msg:"你忍住了诱惑。", cls:"log-info"}; } }
             ]
         },
         {
-            t: "黑市交易",
-            d: "有人在兜售一批来路不明的药草。",
+            t: "黑市盲盒",
+            d: "神秘商人兜售三个锦囊，售价 100 灵石，声称其中有大造化。",
             opts: [
-                { txt: "花费50灵石赌一把", act: (g) => { 
-                    if(state.gold < 50) return "灵石不足！";
+                { txt: "买红色锦囊", act: (g) => { 
+                     if(!checkGold(100)) return {msg:"穷鬼，滚！", cls:"log-loss"};
+                     state.gold -= 100; g.addExp(300); return {msg:"里面是精纯妖丹！修为+300", cls:"log-gain"};
+                }},
+                { txt: "买黑色锦囊", act: (g) => { 
+                     if(!checkGold(100)) return {msg:"穷鬼，滚！", cls:"log-loss"};
+                     state.gold -= 100; return {msg:"里面是一张嘲讽你的纸条。", cls:"log-loss"};
+                }},
+                { txt: "不买", act: (g) => { return {msg:"你没理会商人的推销。", cls:"log-info"}; } }
+            ]
+        },
+
+        // --- 战斗/境界判定类 ---
+        {
+            t: "拦路抢劫",
+            d: "一伙强盗拦住去路，领头的是个练气后期的修士。",
+            opts: [
+                { txt: "交出50灵石买路", act: (g) => { 
+                    if(state.gold>=50) {state.gold-=50; return {msg:"破财免灾。", cls:"log-info"};}
+                    else return {msg:"你没钱，被打了一顿。", cls:"log-loss"};
+                }},
+                { txt: "反击 (需筑基期以上)", act: (g) => { 
+                    if(state.realmIdx >= 4) { // 筑基期索引
+                        state.gold += 200; return {msg:"你随手一挥便击溃了强盗，缴获灵石+200", cls:"log-gold"}; 
+                    } else {
+                        g.addExp(-100); return {msg:"你境界低微，被强盗暴打，修为受损。", cls:"log-loss"}; 
+                    }
+                }}
+            ]
+        },
+        {
+            t: "宗门大比",
+            d: "附近宗门举办比武招亲，你也去凑热闹。",
+            opts: [
+                { txt: "上台挑战", act: (g) => {
+                    const winChance = 0.3 + (state.realmIdx * 0.1);
+                    if(Math.random() < winChance) {
+                        g.addExp(500); return {msg:"技惊四座！获得宗门赏识。修为+500", cls:"log-gain"};
+                    } else {
+                        g.addExp(-50); return {msg:"被人一脚踹下擂台，丢人现眼。修为-50", cls:"log-loss"};
+                    }
+                }},
+                { txt: "吃瓜围观", act: (g) => { g.addExp(20); return {msg:"观摩高手过招，略有所悟。修为+20", cls:"log-gain"}; } }
+            ]
+        },
+
+        // --- 道德/抉择类 ---
+        {
+            t: "重伤的灵狐",
+            d: "草丛中有一只受伤的灵狐，看起来奄奄一息。",
+            opts: [
+                { txt: "耗费灵石救治 (-50灵石)", act: (g) => {
+                    if(!checkGold(50)) return {msg:"你有心无力。", cls:"log-info"};
                     state.gold -= 50;
-                    if(Math.random()>0.4) { g.addExp(200); return "好药！修为精进。"; }
-                    else { return "全是枯草，被骗了！"; }
+                    if(Math.random() > 0.3) {
+                         state.petLvl++; return {msg:"灵狐为了报恩，决定追随你！(灵兽等级+1)", cls:"log-gain"};
+                    }
+                    return {msg:"灵狐伤好后跑了，留下几根灵毛。", cls:"log-info"};
                 }},
-                { txt: "离开", act: (g) => { return "你谨慎地离开了。"; } }
+                { txt: "剥皮卖钱", act: (g) => {
+                    state.gold += 80; return {msg:"虽然残忍，但皮毛卖了80灵石。", cls:"log-gold"};
+                }}
+            ]
+        },
+        {
+            t: "古修遗府",
+            d: "发现一座上古洞府，门口禁制闪烁。",
+            opts: [
+                { txt: "强行破阵 (高风险)", act: (g) => {
+                    if(Math.random() > 0.6) {
+                        state.gold += 500; g.addExp(500); return {msg:"富贵险中求！获得大量宝物！", cls:"log-gold"};
+                    } else {
+                        g.addExp(-200); return {msg:"禁制反噬！你被炸得灰头土脸。修为-200", cls:"log-loss"};
+                    }
+                }},
+                { txt: "在外围捡漏", act: (g) => {
+                    state.gold += 50; return {msg:"捡到一些残羹冷炙。灵石+50", cls:"log-gold"};
+                }}
+            ]
+        },
+
+        // --- 修炼异象类 ---
+        {
+            t: "心魔入侵",
+            d: "修炼时心神不宁，似乎有天魔乱舞。",
+            opts: [
+                { txt: "紧守道心 (50%概率)", act: (g) => {
+                    if(Math.random() > 0.5) {
+                        g.addExp(300); return {msg:"战胜心魔，道心更加稳固！修为+300", cls:"log-gain"};
+                    } else {
+                        g.addExp(-100); return {msg:"心神失守，吐出一口鲜血。修为-100", cls:"log-loss"};
+                    }
+                }},
+                { txt: "立刻出关", act: (g) => { return {msg:"虽然中断了修炼，但保住了平安。", cls:"log-info"}; } }
+            ]
+        },
+        {
+            t: "天道顿悟",
+            d: "观看云卷云舒，忽有所感，进入顿悟状态。",
+            opts: [
+                { txt: "顺其自然", act: (g) => {
+                     const gain = 200 * (state.realmIdx + 1);
+                     g.addExp(gain); return {msg:`顿悟良久，修为大涨！修为+${gain}`, cls:"log-gain"};
+                }}
             ]
         }
     ];
@@ -349,12 +457,10 @@
         },
 
         tick() {
-            // 资源产出
             const income = this.getIncomeRate();
             state.gold += income;
             if (state.petLvl > 0) this.addExp(state.petLvl * 2);
 
-            // 机缘逻辑 (修复点)
             eventTimer--;
             if(eventTimer <= 0) {
                 this.triggerEvent();
@@ -378,8 +484,15 @@
                 btn.innerText = opt.txt;
                 btn.onclick = () => {
                     const res = opt.act(this);
-                    if(res !== "灵石不足！") modal.style.display = "none";
-                    ui.log(`[奇遇] ${res}`);
+                    // 如果结果是对象，解构出消息和样式
+                    if (typeof res === 'object' && res.msg) {
+                        ui.log(res.msg, res.cls);
+                        if(res.msg !== "灵石不足！" && res.msg !== "穷鬼，滚！") modal.style.display = "none";
+                    } else {
+                        // 兼容旧格式
+                        ui.log(res); 
+                        modal.style.display = "none";
+                    }
                     this.updateUI();
                 };
                 choices.appendChild(btn);
@@ -418,16 +531,16 @@
             if (state.gold >= cost) {
                 state.gold -= cost;
                 const msg = item.action(state);
-                ui.log(msg);
+                ui.log(msg, "log-gold");
                 this.renderMarket();
                 this.updateUI();
             } else {
-                ui.log("灵石不足！无法购买 " + item.name);
+                ui.log("灵石不足！无法购买 " + item.name, "log-loss");
             }
         },
 
         attemptBreakthrough() {
-            if (state.exp < state.maxExp) { ui.log("修为未满，无法感应天劫。"); return; }
+            if (state.exp < state.maxExp) { ui.log("修为未满，无法感应天劫。", "log-info"); return; }
             let chance = Math.max(0.1, 1.0 - (state.realmIdx * 0.1)) + state.luckBonus;
             
             if (Math.random() < chance) {
@@ -435,16 +548,16 @@
                 state.exp = 0;
                 state.maxExp = Math.floor(state.maxExp * 2.5);
                 state.luckBonus = 0;
-                ui.log(`=== 渡劫成功！晋升 [${CONFIG.realms[state.realmIdx]}] ===`);
+                ui.log(`=== 渡劫成功！晋升 [${CONFIG.realms[state.realmIdx]}] ===`, "log-gold");
             } else {
                 state.luckBonus = 0;
                 if (state.hasAmulet) {
                     state.hasAmulet = false;
-                    ui.log("突破失败！替身草人炸裂，保住了修为。");
+                    ui.log("突破失败！替身草人炸裂，保住了修为。", "log-gain");
                     this.renderMarket();
                 } else {
                     state.exp = Math.floor(state.maxExp * 0.5);
-                    ui.log("突破失败！损失了一半修为...");
+                    ui.log("突破失败！损失了一半修为...", "log-loss");
                 }
             }
             this.updateUI();
@@ -462,7 +575,7 @@
                     state.exp = Math.min(state.maxExp, state.exp + gainExp);
                     msg += `，灵兽采集 ${gainExp} 修为`;
                 }
-                ui.log(msg + "。");
+                ui.log(msg + "。", "log-info");
             }
         },
 
@@ -497,10 +610,9 @@
             document.getElementById('exp-text').innerText = Math.floor(state.exp);
             document.getElementById('max-exp-text').innerText = state.maxExp;
             
-            // 倒计时更新 (修复点)
             const tEl = document.getElementById('event-timer');
             tEl.innerText = eventTimer;
-            tEl.style.color = eventTimer <= 5 ? 'red' : '#aaa'; // 倒计时变红
+            tEl.style.color = eventTimer <= 5 ? 'red' : '#aaa';
 
             let chance = Math.max(0.1, 1.0 - (state.realmIdx * 0.1)) + state.luckBonus;
             document.getElementById('chance-text').innerText = Math.min(100, Math.floor(chance * 100)) + "%";
@@ -518,8 +630,8 @@
             });
         },
 
-        save() { state.lastSave = Date.now(); localStorage.setItem('xiuxian_v6', JSON.stringify(state)); },
-        load() { const d = localStorage.getItem('xiuxian_v6'); if (d) state = { ...state, ...JSON.parse(d) }; }
+        save() { state.lastSave = Date.now(); localStorage.setItem('xiuxian_v7', JSON.stringify(state)); },
+        load() { const d = localStorage.getItem('xiuxian_v7'); if (d) state = { ...state, ...JSON.parse(d) }; }
     };
 
     const ui = {
@@ -529,10 +641,11 @@
             document.querySelectorAll('.view-content').forEach(e => e.classList.add('hidden'));
             document.getElementById('view-' + tab).classList.remove('hidden');
         },
-        log(msg) {
+        log(msg, cls) {
             const box = document.getElementById('log-container');
             const div = document.createElement('div');
-            div.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString('zh-CN',{hour12:false})}]</span> ${msg}`;
+            const time = new Date().toLocaleTimeString('zh-CN',{hour12:false});
+            div.innerHTML = `<span class="log-time">[${time}]</span> <span class="${cls || ''}">${msg}</span>`;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         },
