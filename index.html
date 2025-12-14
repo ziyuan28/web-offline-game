@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>灵石修仙传 - 百态修仙版</title>
+    <title>灵石修仙传 - 洞府重修版</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -15,6 +15,7 @@
             --green: #69f0ae;
             --purple: #b388ff;
             --card-bg: #252525;
+            --danger: #d32f2f;
         }
         body {
             background-color: var(--bg-color);
@@ -29,13 +30,7 @@
             user-select: none;
         }
 
-        .app-container {
-            width: 1000px;
-            height: 750px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .app-container { width: 1000px; height: 750px; display: flex; flex-direction: column; gap: 15px; }
 
         /* --- Top Section --- */
         .top-section { display: flex; gap: 15px; flex: 2; min-height: 0; }
@@ -44,101 +39,82 @@
 
         /* --- Tabs --- */
         .nav-tabs { display: flex; background: #111; border-bottom: 1px solid var(--border-color); }
-        .nav-item { padding: 15px 25px; cursor: pointer; color: #888; transition: 0.2s; border-right: 1px solid var(--border-color); font-weight: bold; }
+        .nav-item { flex: 1; text-align: center; padding: 15px 0; cursor: pointer; color: #888; transition: 0.2s; border-right: 1px solid var(--border-color); font-weight: bold; font-size: 16px; }
         .nav-item:hover { color: #ccc; background: #1a1a1a; }
-        .nav-item.active { color: var(--gold); background: var(--panel-bg); border-bottom: 2px solid var(--gold); }
+        .nav-item.active { color: var(--gold); background: var(--panel-bg); border-bottom: 3px solid var(--gold); }
 
-        /* --- Content --- */
+        /* --- Views --- */
         .view-content { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
         .hidden { display: none !important; }
 
-        /* Scene: Spirit Orb */
-        .scene-area {
-            flex: 1; display: flex; justify-content: center; align-items: center;
-            border: 1px dashed #333; border-radius: 8px; margin-bottom: 20px;
-            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
-            position: relative; overflow: hidden;
+        /* View 1: Home (Cultivate) */
+        .home-scene {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 80%);
+            border-radius: 8px; border: 1px solid #333; position: relative;
         }
         .spirit-orb {
-            width: 140px; height: 140px; border-radius: 50%;
+            width: 160px; height: 160px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, var(--blue), transparent);
-            box-shadow: 0 0 40px var(--blue), inset 0 0 20px #fff;
+            box-shadow: 0 0 50px var(--blue), inset 0 0 20px #fff;
             animation: breathe 4s infinite ease-in-out;
             display: flex; justify-content: center; align-items: center;
-            font-size: 32px; cursor: pointer; transition: transform 0.1s; z-index: 10;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            font-size: 40px; cursor: pointer; transition: transform 0.1s; z-index: 10;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5); user-select: none;
         }
-        .spirit-orb:active { transform: scale(0.92); }
+        .spirit-orb:active { transform: scale(0.95); }
+        
+        /* View 2: Map Cards */
+        .current-map-banner {
+            padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444;
+            background-size: cover; transition: 0.3s; display: flex; justify-content: space-between; align-items: center;
+        }
+        .bg-map-0 { background: linear-gradient(45deg, #1e1e1e, #2a2a2a); border-left: 4px solid #888; }
+        .bg-map-1 { background: linear-gradient(45deg, #1a2a1a, #0d1a0d); border-left: 4px solid var(--green); }
+        .bg-map-2 { background: linear-gradient(45deg, #2a1a1a, #1a0d0d); border-left: 4px solid var(--red); }
+        .bg-map-3 { background: linear-gradient(45deg, #1a1a2a, #000); border-left: 4px solid var(--purple); }
 
-        /* Floating Text Animation */
-        .floating-text {
-            position: absolute; color: var(--green); font-weight: bold; font-size: 20px;
-            pointer-events: none; animation: floatUp 1s forwards; text-shadow: 1px 1px 2px black; z-index: 999;
+        .map-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .map-card {
+            background: #252525; border: 1px solid #444; padding: 15px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center; transition: 0.2s;
         }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
-        }
+        .map-card:hover { border-color: #666; background: #2a2a2a; }
+        .map-info h3 { margin: 0 0 5px 0; font-size: 16px; color: var(--gold); }
+        .map-btn { padding: 8px 16px; border-radius: 4px; border: 1px solid #555; background: #333; color: #ccc; cursor: pointer; }
+        .map-btn:hover { background: var(--blue); color: #000; border-color: var(--blue); }
+        .map-btn.active { background: var(--green); color: #000; border-color: var(--green); cursor: default; }
+        .map-btn.locked { opacity: 0.5; cursor: not-allowed; background: #222; }
 
-        /* Market Grid */
-        .market-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 20px; }
-        .item-card {
-            background: var(--card-bg); border: 1px solid #333; border-radius: 6px; padding: 12px;
-            display: flex; flex-direction: column; justify-content: space-between; min-height: 100px;
-        }
+        /* Market & General */
+        .market-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .item-card { background: var(--card-bg); border: 1px solid #333; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 100px; }
         .item-card:hover { border-color: #555; background: #2a2a2a; }
-        .item-head { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .item-name { font-weight: bold; color: var(--gold); }
-        .item-lvl { font-size: 12px; color: var(--purple); background: #111; padding: 2px 6px; border-radius: 4px; }
-        .item-desc { font-size: 12px; color: #888; margin-bottom: 10px; line-height: 1.4; flex: 1; }
-        .btn-buy {
-            background: #333; border: 1px solid #444; color: #ccc; padding: 8px; border-radius: 4px;
-            cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-buy:hover:not(:disabled) { background: var(--gold); color: #000; border-color: var(--gold); }
-        .btn-buy:active:not(:disabled) { transform: scale(0.98); }
+        .btn-buy { background: #333; border: 1px solid #444; color: #ccc; padding: 8px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; }
+        .btn-buy:hover:not(:disabled) { background: var(--gold); color: #000; }
         .btn-buy:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* General UI */
+        .log-panel { flex: 1; background: #111; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; min-height: 0; font-family: 'Consolas', monospace; }
+        .log-container { flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.6; }
+        .log-container::-webkit-scrollbar { width: 6px; }
+        .log-container::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        
         .header { font-size: 18px; color: var(--gold); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; font-weight: bold; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; align-items: center; }
         .progress-bar { width: 100%; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-top: 5px; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--purple)); width: 0%; transition: width 0.2s ease-out; }
         
-        .log-panel { flex: 1; background: #111; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; min-height: 0; font-family: 'Consolas', monospace; }
-        .log-container { flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.6; }
-        .log-container::-webkit-scrollbar { width: 6px; }
-        .log-container::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-        .log-time { color: #555; margin-right: 8px; }
-        
-        /* 不同的日志颜色 */
-        .log-gain { color: var(--green); }
-        .log-loss { color: var(--red); }
-        .log-info { color: #aaa; }
-        .log-gold { color: var(--gold); }
+        .floating-text { position: absolute; color: var(--green); font-weight: bold; font-size: 24px; pointer-events: none; animation: floatUp 0.8s forwards; text-shadow: 1px 1px 2px black; z-index: 100; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.3); } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 50px var(--blue); opacity: 0.9; } 50% { transform: scale(1.05); box-shadow: 0 0 80px var(--purple); opacity: 1; } }
 
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--blue); opacity: 0.9; }
-            50% { transform: scale(1.05); box-shadow: 0 0 70px var(--purple); opacity: 1; }
-        }
+        /* Colors */
+        .c-danger { color: var(--red); } .c-safe { color: var(--green); } .c-gold { color: var(--gold); } .c-exp { color: var(--blue); }
 
         /* Modal */
-        #event-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 200;
-            justify-content: center; align-items: center; backdrop-filter: blur(2px);
-        }
-        .modal-content {
-            background: #252525; width: 450px; padding: 25px;
-            border: 1px solid var(--red); box-shadow: 0 0 30px rgba(255, 82, 82, 0.3);
-            border-radius: 12px; text-align: center;
-        }
-        .modal-btn {
-            width: 100%; margin-top: 10px; padding: 15px;
-            font-size: 16px; background: #333; color: #fff;
-            border: 1px solid #555; cursor: pointer; transition: 0.2s;
-        }
-        .modal-btn:hover { background: #444; border-color: #777; }
+        #event-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-content { background: #252525; width: 450px; padding: 25px; border: 1px solid var(--red); box-shadow: 0 0 30px rgba(255, 82, 82, 0.3); border-radius: 12px; text-align: center; }
+        .modal-btn { width: 100%; margin-top: 10px; padding: 15px; font-size: 16px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; transition: 0.2s; }
     </style>
 </head>
 <body>
@@ -150,18 +126,17 @@
         <div class="status-panel">
             <div class="header">道友面板</div>
             <div class="stat-row"><span>境界</span> <span id="realm-text" style="color:var(--purple); font-weight:bold;">凡人</span></div>
-            <div class="stat-row"><span>灵石</span> <span style="color:var(--gold); font-weight:bold;"><span id="gold-text">0</span></span></div>
+            <div class="stat-row"><span>灵石</span> <span class="c-gold" style="font-weight:bold;"><span id="gold-text">0</span></span></div>
             
             <div style="height:1px; background:#333; margin:10px 0;"></div>
             
-            <div class="stat-row" style="color:#aaa;">
-                <span>机缘倒计时</span>
-                <span id="event-timer" style="color:var(--red); font-weight:bold;">30</span>
-            </div>
+            <div class="stat-row"><span>当前位置</span> <span id="location-text" style="color:var(--blue)">闭关洞府</span></div>
+            <div class="stat-row" title="境界+心法"><span>战斗力</span> <span id="power-text" style="color:var(--red); font-weight:bold;">1</span></div>
 
-            <div class="stat-row" title="来自聚灵阵"><span>灵石产出</span> <span><span id="income-text">0</span> /秒</span></div>
-            <div class="stat-row" title="来自灵兽"><span>自动修为</span> <span><span id="auto-exp-text">0</span> /秒</span></div>
-            <div class="stat-row" title="手动点击收益"><span>打坐效率</span> <span><span id="click-power">1</span> /次</span></div>
+            <div style="margin-top:10px; font-size:12px; color:#aaa;">
+                <div class="stat-row"><span>聚灵产出</span> <span><span id="income-text">0</span> /s</span></div>
+                <div class="stat-row"><span>地图加成</span> <span id="map-mult-text" class="c-safe">x1.0</span></div>
+            </div>
             
             <div style="margin-top:auto; margin-bottom:15px;">
                 <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa;">
@@ -172,10 +147,10 @@
             </div>
 
             <div id="amulet-status" style="font-size:12px; color:var(--green); margin-bottom:10px; display:none; text-align:center;">
-                🛡️ 护身符生效中 (失败不掉级)
+                🛡️ 护身符生效中
             </div>
 
-            <button id="break-btn" onclick="game.attemptBreakthrough()" style="width:100%; padding:12px; background:#223; border:1px solid var(--blue); color:var(--blue); cursor:pointer; border-radius:4px; font-weight:bold;">
+            <button onclick="game.attemptBreakthrough()" style="width:100%; padding:12px; background:#223; border:1px solid var(--blue); color:var(--blue); cursor:pointer; border-radius:4px; font-weight:bold;">
                 ⚡ 冲击瓶颈 (<span id="chance-text">100%</span>)
             </button>
         </div>
@@ -183,24 +158,57 @@
         <!-- 右侧主界面 -->
         <div class="main-panel">
             <div class="nav-tabs">
-                <div class="nav-item active" onclick="ui.switchTab('cave', this)">洞府</div>
+                <div class="nav-item active" onclick="ui.switchTab('home', this)">修炼</div>
+                <div class="nav-item" onclick="ui.switchTab('map', this)">历练</div>
                 <div class="nav-item" onclick="ui.switchTab('market', this)">坊市</div>
             </div>
 
-            <!-- Tab: 洞府 -->
-            <div id="view-cave" class="view-content">
-                <div class="scene-area" id="scene-area">
-                    <div class="spirit-orb" onmousedown="game.manualCultivate(event)">道</div>
-                    <div style="position: absolute; bottom: 20px; font-size: 14px; color: #888;">
-                        点击吞吐灵气
-                    </div>
+            <!-- Tab 1: 修练 (Home - Active Clicking) -->
+            <div id="view-home" class="view-content">
+                <div style="text-align:center; color:#888; margin-bottom:10px; font-size:13px;">
+                    “万般皆下品，唯有修仙高。”<br>
+                    <span style="font-size:12px; color:#666">点击灵球，吞吐天地灵气</span>
                 </div>
-                <div style="text-align:center; color:#555; font-size:12px; font-style:italic;">
-                    “万般皆下品，唯有修仙高。”
+                
+                <div class="home-scene">
+                    <div style="position:absolute; top:10px; left:10px; font-size:12px; color:rgba(255,255,255,0.5);">
+                        机缘倒计时: <span id="event-timer" style="color:var(--red)">30</span>s
+                    </div>
+                    
+                    <!-- 核心点击区域 -->
+                    <div class="spirit-orb" onmousedown="game.manualCultivate(event)">道</div>
+                    
+                    <div style="margin-top:40px; color:#555; font-size:12px;">
+                        每次打坐获得 <span id="click-val-disp" style="color:var(--green)">1</span> 点修为
+                    </div>
                 </div>
             </div>
 
-            <!-- Tab: 坊市 -->
+            <!-- Tab 2: 历练 (Map - Idle Strategy) -->
+            <div id="view-map" class="view-content hidden">
+                <!-- 当前地图状态条 -->
+                <div id="cur-map-banner" class="current-map-banner bg-map-0">
+                    <div>
+                        <div style="font-size:12px; color:#ccc;">正在游历</div>
+                        <div style="font-size:18px; font-weight:bold; color:#fff;" id="banner-loc-name">闭关洞府</div>
+                    </div>
+                    <div style="text-align:right; font-size:12px; color:#ddd;">
+                        <div id="banner-risk-text">安全区域</div>
+                        <div id="banner-bonus-text">收益 x1.0</div>
+                    </div>
+                </div>
+
+                <h4 style="margin:0 0 10px 0; color:#888; border-bottom:1px solid #333; padding-bottom:5px;">选择历练地点</h4>
+                <div class="map-grid" id="map-list">
+                    <!-- JS 生成地图列表 -->
+                </div>
+                
+                <div style="margin-top:20px; font-size:12px; color:#666; line-height:1.5;">
+                    <span style="color:var(--red)">*注意*</span>：若战力不足强行进入危险区域，会遭遇妖兽袭击并被强制送回，且损失灵石。
+                </div>
+            </div>
+
+            <!-- Tab 3: 坊市 (Market) -->
             <div id="view-market" class="view-content hidden">
                 <div class="market-grid" id="market-list"></div>
             </div>
@@ -217,7 +225,7 @@
 <div id="event-modal">
     <div class="modal-content">
         <h2 style="color:var(--red); margin-top:0;" id="modal-title">奇遇</h2>
-        <p id="modal-desc" style="color:#ccc; line-height:1.6; margin:20px 0;">内容...</p>
+        <p id="modal-desc" style="color:#ccc; line-height:1.6; margin:20px 0;"></p>
         <div id="modal-choices"></div>
     </div>
 </div>
@@ -225,241 +233,72 @@
 <script>
     /* --- 1. 配置与数据 --- */
     const CONFIG = {
-        realms: ["凡人", "炼气初期", "炼气中期", "炼气后期", "筑基期", "金丹大道", "元婴老祖", "化神天尊", "炼虚合道", "大乘渡劫", "陆地神仙"],
-        eventInterval: 30 // 30秒一次
+        realms: ["凡人", "炼气初期", "炼气中期", "炼气后期", "筑基期", "金丹大道", "元婴老祖", "化神天尊", "炼虚合道", "大乘渡劫"],
+        eventInterval: 30
     };
 
+    const MAPS = [
+        { id: 0, name: "闭关洞府", req: 0, desc: "绝对安全之地。", goldMult: 1.0, autoExp: 0, risk: 0 },
+        { id: 1, name: "后山外围", req: 1, desc: "灵气稍浓，偶有野兽。", goldMult: 1.5, autoExp: 2, risk: 0.05, powerReq: 5 },
+        { id: 2, name: "幽冥鬼林", req: 4, desc: "妖气弥漫，宝物众多。", goldMult: 3.0, autoExp: 10, risk: 0.15, powerReq: 25 },
+        { id: 3, name: "上古战场", req: 6, desc: "大能陨落之地，九死一生。", goldMult: 6.0, autoExp: 50, risk: 0.3, powerReq: 100 }
+    ];
+
     const defaultState = {
-        gold: 0,
-        exp: 0,
-        maxExp: 100,
-        realmIdx: 0,
-        lastSave: Date.now(),
-        incomeLvl: 1, clickLvl: 1, petLvl: 0,
-        hasAmulet: false, luckBonus: 0
+        gold: 0, exp: 0, maxExp: 100, realmIdx: 0, lastSave: Date.now(),
+        incomeLvl: 1, clickLvl: 1, petLvl: 0, hasAmulet: false, luckBonus: 0,
+        curMapId: 0
     };
 
     let state = { ...defaultState };
     let eventTimer = CONFIG.eventInterval;
 
-    /* --- 2. 扩充的随机事件库 (15+ 个事件) --- */
-    // Helper: 检查是否有足够灵石
-    const checkGold = (val) => state.gold >= val;
-    
+    /* --- 2. 随机事件库 --- */
     const EVENTS = [
-        // --- 基础福利类 ---
-        {
-            t: "路遇乞丐",
-            d: "一个疯疯癫癫的老头拦住你，非要送你一本破书。",
-            opts: [
-                { txt: "收下看看", act: (g) => { g.addExp(100); return {msg:"破书竟是残缺心法，修为+100！", cls:"log-gain"}; } },
-                { txt: "嫌脏走开", act: (g) => { return {msg:"你错过了机缘。", cls:"log-info"}; } }
-            ]
-        },
-        {
-            t: "天降横财",
-            d: "你在后山被石头绊倒，挖开一看...",
-            opts: [
-                { txt: "挖开", act: (g) => { state.gold+=100; return {msg:"竟是一块下品灵石！灵石+100", cls:"log-gold"}; } }
-            ]
-        },
-        
-        // --- 赌博/交易类 ---
-        {
-            t: "赌石大会",
-            d: "坊市正在举办赌石，每块原石售价 200 灵石。",
-            opts: [
-                { txt: "买一块 (200灵石)", act: (g) => { 
-                    if(!checkGold(200)) return {msg:"灵石不足！", cls:"log-loss"};
-                    state.gold -= 200;
-                    const rnd = Math.random();
-                    if(rnd > 0.8) { state.gold += 1000; return {msg:"切出了极品玉髓！灵石+1000", cls:"log-gold"}; }
-                    if(rnd > 0.5) { state.gold += 300; return {msg:"切出了普通灵玉。灵石+300", cls:"log-gold"}; }
-                    return {msg:"全是废料，血本无归。", cls:"log-loss"};
-                }},
-                { txt: "看看就好", act: (g) => { return {msg:"你忍住了诱惑。", cls:"log-info"}; } }
-            ]
-        },
-        {
-            t: "黑市盲盒",
-            d: "神秘商人兜售三个锦囊，售价 100 灵石，声称其中有大造化。",
-            opts: [
-                { txt: "买红色锦囊", act: (g) => { 
-                     if(!checkGold(100)) return {msg:"穷鬼，滚！", cls:"log-loss"};
-                     state.gold -= 100; g.addExp(300); return {msg:"里面是精纯妖丹！修为+300", cls:"log-gain"};
-                }},
-                { txt: "买黑色锦囊", act: (g) => { 
-                     if(!checkGold(100)) return {msg:"穷鬼，滚！", cls:"log-loss"};
-                     state.gold -= 100; return {msg:"里面是一张嘲讽你的纸条。", cls:"log-loss"};
-                }},
-                { txt: "不买", act: (g) => { return {msg:"你没理会商人的推销。", cls:"log-info"}; } }
-            ]
-        },
-
-        // --- 战斗/境界判定类 ---
-        {
-            t: "拦路抢劫",
-            d: "一伙强盗拦住去路，领头的是个练气后期的修士。",
-            opts: [
-                { txt: "交出50灵石买路", act: (g) => { 
-                    if(state.gold>=50) {state.gold-=50; return {msg:"破财免灾。", cls:"log-info"};}
-                    else return {msg:"你没钱，被打了一顿。", cls:"log-loss"};
-                }},
-                { txt: "反击 (需筑基期以上)", act: (g) => { 
-                    if(state.realmIdx >= 4) { // 筑基期索引
-                        state.gold += 200; return {msg:"你随手一挥便击溃了强盗，缴获灵石+200", cls:"log-gold"}; 
-                    } else {
-                        g.addExp(-100); return {msg:"你境界低微，被强盗暴打，修为受损。", cls:"log-loss"}; 
-                    }
-                }}
-            ]
-        },
-        {
-            t: "宗门大比",
-            d: "附近宗门举办比武招亲，你也去凑热闹。",
-            opts: [
-                { txt: "上台挑战", act: (g) => {
-                    const winChance = 0.3 + (state.realmIdx * 0.1);
-                    if(Math.random() < winChance) {
-                        g.addExp(500); return {msg:"技惊四座！获得宗门赏识。修为+500", cls:"log-gain"};
-                    } else {
-                        g.addExp(-50); return {msg:"被人一脚踹下擂台，丢人现眼。修为-50", cls:"log-loss"};
-                    }
-                }},
-                { txt: "吃瓜围观", act: (g) => { g.addExp(20); return {msg:"观摩高手过招，略有所悟。修为+20", cls:"log-gain"}; } }
-            ]
-        },
-
-        // --- 道德/抉择类 ---
-        {
-            t: "重伤的灵狐",
-            d: "草丛中有一只受伤的灵狐，看起来奄奄一息。",
-            opts: [
-                { txt: "耗费灵石救治 (-50灵石)", act: (g) => {
-                    if(!checkGold(50)) return {msg:"你有心无力。", cls:"log-info"};
-                    state.gold -= 50;
-                    if(Math.random() > 0.3) {
-                         state.petLvl++; return {msg:"灵狐为了报恩，决定追随你！(灵兽等级+1)", cls:"log-gain"};
-                    }
-                    return {msg:"灵狐伤好后跑了，留下几根灵毛。", cls:"log-info"};
-                }},
-                { txt: "剥皮卖钱", act: (g) => {
-                    state.gold += 80; return {msg:"虽然残忍，但皮毛卖了80灵石。", cls:"log-gold"};
-                }}
-            ]
-        },
-        {
-            t: "古修遗府",
-            d: "发现一座上古洞府，门口禁制闪烁。",
-            opts: [
-                { txt: "强行破阵 (高风险)", act: (g) => {
-                    if(Math.random() > 0.6) {
-                        state.gold += 500; g.addExp(500); return {msg:"富贵险中求！获得大量宝物！", cls:"log-gold"};
-                    } else {
-                        g.addExp(-200); return {msg:"禁制反噬！你被炸得灰头土脸。修为-200", cls:"log-loss"};
-                    }
-                }},
-                { txt: "在外围捡漏", act: (g) => {
-                    state.gold += 50; return {msg:"捡到一些残羹冷炙。灵石+50", cls:"log-gold"};
-                }}
-            ]
-        },
-
-        // --- 修炼异象类 ---
-        {
-            t: "心魔入侵",
-            d: "修炼时心神不宁，似乎有天魔乱舞。",
-            opts: [
-                { txt: "紧守道心 (50%概率)", act: (g) => {
-                    if(Math.random() > 0.5) {
-                        g.addExp(300); return {msg:"战胜心魔，道心更加稳固！修为+300", cls:"log-gain"};
-                    } else {
-                        g.addExp(-100); return {msg:"心神失守，吐出一口鲜血。修为-100", cls:"log-loss"};
-                    }
-                }},
-                { txt: "立刻出关", act: (g) => { return {msg:"虽然中断了修炼，但保住了平安。", cls:"log-info"}; } }
-            ]
-        },
-        {
-            t: "天道顿悟",
-            d: "观看云卷云舒，忽有所感，进入顿悟状态。",
-            opts: [
-                { txt: "顺其自然", act: (g) => {
-                     const gain = 200 * (state.realmIdx + 1);
-                     g.addExp(gain); return {msg:`顿悟良久，修为大涨！修为+${gain}`, cls:"log-gain"};
-                }}
-            ]
-        }
+        { t: "路遇乞丐", d: "疯老头给你一本破书。", opts: [{txt:"收下", act:(g)=>{g.addExp(100); return {msg:"修为+100", cls:"c-exp"};}}, {txt:"走开", act:()=>{return "无事发生";}}] },
+        { t: "天降横财", d: "被灵石绊倒。", opts: [{txt:"捡起", act:(g)=>{state.gold+=100; return {msg:"灵石+100", cls:"c-gold"};}}] },
+        { t: "黑市赌石", d: "花费200灵石切石头。", opts: [{txt:"买一块", act:(g)=>{
+            if(state.gold<200) return {msg:"钱不够", cls:"c-danger"};
+            state.gold-=200;
+            return Math.random()>0.6 ? {msg:"切涨了！灵石+500",cls:"c-gold",val:500,act:()=>state.gold+=500} : {msg:"废料一块。",cls:"c-danger"};
+        }}, {txt:"不买", act:()=>"你离开了"}] }
     ];
 
-    /* --- 3. 坊市商品定义 --- */
+    /* --- 3. 坊市商品 --- */
     const MARKET_ITEMS = [
-        {
-            id: 'income', name: '💎 聚灵阵法', type: 'upgrade',
-            desc: '升级洞府灵脉，增加灵石自动产出。',
-            baseCost: 50, costMult: 1.5,
-            getVal: (s) => s.incomeLvl,
-            effect: (s) => `产出 +1/s`,
-            action: (s) => { s.incomeLvl++; return "聚灵阵升级！灵气更加浓郁了。"; }
-        },
-        {
-            id: 'click', name: '📖 吐纳心法', type: 'upgrade',
-            desc: '改良呼吸法门，提升每次打坐的修为。',
-            baseCost: 100, costMult: 1.6,
-            getVal: (s) => s.clickLvl,
-            effect: (s) => `点击 +2`,
-            action: (s) => { s.clickLvl++; return "心法精进！打坐效率提升。"; }
-        },
-        {
-            id: 'pet', name: '🦊 饲养灵兽', type: 'upgrade',
-            desc: '驯养一只灵狐，它会帮你自动修炼。',
-            baseCost: 1000, costMult: 1.8,
-            getVal: (s) => s.petLvl,
-            effect: (s) => `自动修为 +${(s.petLvl+1)*2}/s`,
-            action: (s) => { s.petLvl++; return "灵兽成长了！它开始帮你聚集修为。"; }
-        },
-        {
-            id: 'pill_s', name: '💊 聚气散', type: 'con',
-            desc: '炼气期修士常用的丹药，服用可增进修为。',
-            cost: 20,
-            effect: () => `修为 +50`,
-            action: (s) => { game.addExp(50); return "服用聚气散，暖流涌遍全身。"; }
-        },
-        {
-            id: 'luck', name: '🍀 气运金龙', type: 'con',
-            desc: '购买一次性的天道气运，提升下次突破成功率。',
-            cost: 300,
-            effect: () => `成功率 +5%`,
-            action: (s) => { s.luckBonus += 0.05; return "气运加身！下次突破如有神助。"; }
-        },
-        {
-            id: 'amulet', name: '🛡️ 替身草人', type: 'unique',
-            desc: '珍贵的替身法宝。抵挡一次突破失败的惩罚。',
-            cost: 500,
-            req: (s) => !s.hasAmulet,
-            effect: () => `保命一次`,
-            action: (s) => { s.hasAmulet = true; return "装备替身草人！心里踏实多了。"; }
-        }
+        { id: 'income', name: '💎 聚灵阵法', type: 'up', base: 50, mult: 1.5, val: s=>s.incomeLvl, eff: s=>`+1/s`, act: s=>{s.incomeLvl++} },
+        { id: 'click', name: '📖 吐纳心法', type: 'up', base: 100, mult: 1.6, val: s=>s.clickLvl, eff: s=>`点击+2`, act: s=>{s.clickLvl++} },
+        { id: 'pet', name: '🦊 饲养灵兽', type: 'up', base: 1000, mult: 1.8, val: s=>s.petLvl, eff: s=>`修为+${(s.petLvl+1)*2}/s`, act: s=>{s.petLvl++} },
+        { id: 'pill_s', name: '💊 聚气散', type: 'con', cost: 20, eff: ()=>`修为+50`, act: s=>game.addExp(50) },
+        { id: 'luck', name: '🍀 气运金龙', type: 'con', cost: 300, eff: ()=>`成功率+5%`, act: s=>s.luckBonus+=0.05 },
+        { id: 'amulet', name: '🛡️ 替身草人', type: 'con', cost: 500, req: s=>!s.hasAmulet, eff: ()=>`保命一次`, act: s=>s.hasAmulet=true }
     ];
 
-    /* --- 4. 游戏核心逻辑 --- */
+    /* --- 4. 核心逻辑 --- */
     const game = {
         init() {
             this.load();
             this.calcOffline();
+            this.renderMaps();
             this.renderMarket();
+            this.updateMapBanner();
             this.updateUI();
-            
             setInterval(() => this.tick(), 1000);
             setInterval(() => this.save(), 10000);
-            
-            ui.log("道友请了！点击灵球修炼，左侧关注机缘倒计时。");
+            ui.log("欢迎道友！在【修炼】页点击灵球，在【历练】页选择挂机地图。");
         },
 
         tick() {
-            const income = this.getIncomeRate();
-            state.gold += income;
-            if (state.petLvl > 0) this.addExp(state.petLvl * 2);
+            const map = MAPS[state.curMapId];
+            const baseIncome = this.getIncomeRate();
+            state.gold += baseIncome * map.goldMult;
+
+            let autoExp = (state.petLvl * 2) + map.autoExp;
+            if(autoExp > 0) this.addExp(autoExp);
+
+            if (map.risk > 0 && Math.random() < map.risk) {
+                this.triggerCombat(map);
+            }
 
             eventTimer--;
             if(eventTimer <= 0) {
@@ -469,50 +308,49 @@
             this.updateUI();
         },
 
-        triggerEvent() {
-            const evt = EVENTS[Math.floor(Math.random() * EVENTS.length)];
-            const modal = document.getElementById('event-modal');
-            const choices = document.getElementById('modal-choices');
+        triggerCombat(map) {
+            const playerPower = this.getPower();
+            const mobPower = Math.floor(map.powerReq * (0.8 + Math.random() * 0.4));
             
-            document.getElementById('modal-title').innerText = evt.t;
-            document.getElementById('modal-desc').innerText = evt.d;
-            choices.innerHTML = "";
-
-            evt.opts.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'modal-btn';
-                btn.innerText = opt.txt;
-                btn.onclick = () => {
-                    const res = opt.act(this);
-                    // 如果结果是对象，解构出消息和样式
-                    if (typeof res === 'object' && res.msg) {
-                        ui.log(res.msg, res.cls);
-                        if(res.msg !== "灵石不足！" && res.msg !== "穷鬼，滚！") modal.style.display = "none";
-                    } else {
-                        // 兼容旧格式
-                        ui.log(res); 
-                        modal.style.display = "none";
-                    }
-                    this.updateUI();
-                };
-                choices.appendChild(btn);
-            });
-            modal.style.display = "flex";
+            if (playerPower >= mobPower) {
+                const rewardGold = Math.floor(mobPower * 2);
+                const rewardExp = Math.floor(mobPower * 1.5);
+                state.gold += rewardGold;
+                this.addExp(rewardExp);
+                ui.log(`遭遇妖兽(战力${mobPower})，轻松斩杀！获灵石${rewardGold}，修为${rewardExp}`, "c-gold");
+            } else {
+                state.curMapId = 0; // 回城
+                const loss = Math.floor(state.gold * 0.1);
+                state.gold -= loss;
+                ui.log(`遭遇大妖(战力${mobPower})，不敌重伤！逃回洞府，损失灵石${loss}`, "c-danger");
+                this.renderMaps();
+                this.updateMapBanner();
+            }
         },
 
-        getClickPower() { return 1 + Math.floor(state.realmIdx * 1.5) + (state.clickLvl - 1) * 2; },
+        getPower() { return (state.realmIdx + 1) * 5 + (state.clickLvl * 2); },
         getIncomeRate() { return 1 + Math.floor((state.incomeLvl - 1) * 1.5); },
+        getClickPower() { return 1 + Math.floor(state.realmIdx * 1.5) + (state.clickLvl - 1) * 2; },
+
+        switchMap(id) {
+            const map = MAPS[id];
+            if (state.realmIdx < map.req) {
+                ui.log(`境界不足！需达到 [${CONFIG.realms[map.req]}]`, "c-danger");
+                return;
+            }
+            state.curMapId = id;
+            ui.log(`前往 [${map.name}] 历练。`, "c-exp");
+            this.renderMaps();
+            this.updateMapBanner();
+            this.updateUI();
+        },
 
         manualCultivate(e) {
             const gain = this.getClickPower();
             this.addExp(gain);
-            
-            let x, y;
-            if (e) { x = e.clientX; y = e.clientY; } 
-            else {
-                const rect = document.getElementById('scene-area').getBoundingClientRect();
-                x = rect.left + rect.width / 2; y = rect.top + rect.height / 2;
-            }
+            // 简单的防抖动，防止点击太快事件对象位置不准
+            let x = e ? e.clientX : window.innerWidth/2;
+            let y = e ? e.clientY : window.innerHeight/2;
             ui.showFloatingText(x, y, `+${gain} 修为`);
         },
 
@@ -523,139 +361,147 @@
             this.updateUI();
         },
 
-        buy(itemIndex) {
-            const item = MARKET_ITEMS[itemIndex];
-            let cost = item.cost;
-            if (item.type === 'upgrade') cost = Math.floor(item.baseCost * Math.pow(item.costMult, item.getVal(state) - 1));
-
+        buy(idx) {
+            const item = MARKET_ITEMS[idx];
+            let cost = item.cost || Math.floor(item.base * Math.pow(item.mult, item.val(state)-1));
             if (state.gold >= cost) {
                 state.gold -= cost;
-                const msg = item.action(state);
-                ui.log(msg, "log-gold");
+                if(item.act) { const r=item.act(state); if(r&&r.act) r.act(); }
+                ui.log("购买成功: " + item.name, "c-gold");
                 this.renderMarket();
                 this.updateUI();
-            } else {
-                ui.log("灵石不足！无法购买 " + item.name, "log-loss");
-            }
+            } else ui.log("灵石不足", "c-danger");
         },
 
         attemptBreakthrough() {
-            if (state.exp < state.maxExp) { ui.log("修为未满，无法感应天劫。", "log-info"); return; }
+            if(state.exp < state.maxExp) { ui.log("修为未满", "c-danger"); return; }
             let chance = Math.max(0.1, 1.0 - (state.realmIdx * 0.1)) + state.luckBonus;
-            
-            if (Math.random() < chance) {
-                state.realmIdx++;
-                state.exp = 0;
-                state.maxExp = Math.floor(state.maxExp * 2.5);
-                state.luckBonus = 0;
-                ui.log(`=== 渡劫成功！晋升 [${CONFIG.realms[state.realmIdx]}] ===`, "log-gold");
+            if(Math.random() < chance) {
+                state.realmIdx++; state.exp=0; state.maxExp=Math.floor(state.maxExp*2.5); state.luckBonus=0;
+                ui.log(`突破成功！晋升 [${CONFIG.realms[state.realmIdx]}]`, "c-exp");
             } else {
-                state.luckBonus = 0;
-                if (state.hasAmulet) {
-                    state.hasAmulet = false;
-                    ui.log("突破失败！替身草人炸裂，保住了修为。", "log-gain");
-                    this.renderMarket();
-                } else {
-                    state.exp = Math.floor(state.maxExp * 0.5);
-                    ui.log("突破失败！损失了一半修为...", "log-loss");
-                }
+                state.luckBonus=0;
+                if(state.hasAmulet) { state.hasAmulet=false; ui.log("替身草人抵挡了天劫！", "c-safe"); this.renderMarket(); }
+                else { state.exp=Math.floor(state.maxExp*0.5); ui.log("突破失败，修为大损！", "c-danger"); }
             }
+            this.renderMaps(); 
             this.updateUI();
         },
 
-        calcOffline() {
-            const now = Date.now();
-            const diff = Math.floor((now - state.lastSave) / 1000);
-            if (diff > 10) {
-                const gainGold = diff * this.getIncomeRate();
-                state.gold += gainGold;
-                let msg = `闭关 ${diff} 秒，获得 ${gainGold} 灵石`;
-                if (state.petLvl > 0) {
-                    const gainExp = diff * (state.petLvl * 2);
-                    state.exp = Math.min(state.maxExp, state.exp + gainExp);
-                    msg += `，灵兽采集 ${gainExp} 修为`;
-                }
-                ui.log(msg + "。", "log-info");
-            }
+        triggerEvent() {
+            const evt = EVENTS[Math.floor(Math.random()*EVENTS.length)];
+            const m=document.getElementById('event-modal');
+            document.getElementById('modal-title').innerText=evt.t;
+            document.getElementById('modal-desc').innerText=evt.d;
+            const c=document.getElementById('modal-choices'); c.innerHTML="";
+            evt.opts.forEach(o=>{
+                const b=document.createElement('button'); b.className='modal-btn'; b.innerText=o.txt;
+                b.onclick=()=>{ 
+                    const res=o.act(this); 
+                    if(typeof res==='object'){ ui.log(res.msg, res.cls); if(res.val) res.act && res.act(); }
+                    else ui.log(res);
+                    m.style.display="none"; this.updateUI();
+                };
+                c.appendChild(b);
+            });
+            m.style.display="flex";
         },
 
-        renderMarket() {
-            const container = document.getElementById('market-list');
-            container.innerHTML = "";
-            MARKET_ITEMS.forEach((item, index) => {
-                if (item.req && !item.req(state)) return;
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                let cost = item.cost, lvlInfo = "";
-                if (item.type === 'upgrade') {
-                    cost = Math.floor(item.baseCost * Math.pow(item.costMult, item.getVal(state) - 1));
-                    lvlInfo = `<span class="item-lvl">Lv.${item.getVal(state)}</span>`;
-                }
-                card.innerHTML = `
-                    <div><div class="item-head"><span class="item-name">${item.name}</span>${lvlInfo}</div>
-                    <div class="item-desc">${item.desc}<br><span style="color:#666">效果: ${item.effect(state)}</span></div></div>
-                    <button class="btn-buy" onclick="game.buy(${index})" ${state.gold < cost ? 'disabled' : ''}>
-                        <span>${item.type === 'upgrade'?'升级':'购买'}</span><span>💰 ${cost}</span>
-                    </button>`;
-                container.appendChild(card);
+        renderMaps() {
+            const list = document.getElementById('map-list'); list.innerHTML = "";
+            MAPS.forEach(map => {
+                const locked = state.realmIdx < map.req;
+                const active = state.curMapId === map.id;
+                const div = document.createElement('div'); div.className = 'map-card';
+                div.innerHTML = `
+                    <div class="map-info">
+                        <h3>${map.name} ${active ? '<span style="font-size:12px;color:#69f0ae">(当前)</span>' : ''}</h3>
+                        <div style="font-size:12px; color:#888;">收益: x${map.goldMult} | 自动修为: +${map.autoExp}/s</div>
+                        <div style="font-size:12px; color:${map.risk>0?'#ff8a80':'#ccc'}">危险度: ${Math.floor(map.risk*100)}% (建议战力: ${map.powerReq||0})</div>
+                    </div>
+                    <button class="map-btn ${active?'active':''} ${locked?'locked':''}" onclick="game.switchMap(${map.id})">
+                        ${locked ? `需${CONFIG.realms[map.req]}` : (active ? '历练中' : '前往')}
+                    </button>
+                `;
+                list.appendChild(div);
             });
         },
 
+        renderMarket() {
+            const l = document.getElementById('market-list'); l.innerHTML="";
+            MARKET_ITEMS.forEach((i,idx)=>{
+                if(i.req && !i.req(state)) return;
+                let cost = i.cost || Math.floor(i.base*Math.pow(i.mult, i.val(state)-1));
+                const d = document.createElement('div'); d.className='item-card';
+                d.innerHTML=`<div class="item-head"><span style="font-weight:bold;color:#ffd700">${i.name}</span>${i.type=='up'?`<span style="font-size:12px;background:#333;padding:2px">Lv.${i.val(state)}</span>`:''}</div><div style="font-size:12px;color:#888;margin:5px 0 10px 0">${i.eff(state)}</div><button class="btn-buy" onclick="game.buy(${idx})" ${state.gold<cost?'disabled':''}><span>${i.type=='up'?'升级':'购买'}</span><span>💰 ${cost}</span></button>`;
+                l.appendChild(d);
+            });
+        },
+
+        updateMapBanner() {
+            const map = MAPS[state.curMapId];
+            const el = document.getElementById('cur-map-banner');
+            el.className = `current-map-banner bg-map-${state.curMapId}`;
+            document.getElementById('banner-loc-name').innerText = map.name;
+            document.getElementById('banner-risk-text').innerText = map.risk === 0 ? "安全区域" : `危险区域 (风险:${map.risk*100}%)`;
+            document.getElementById('banner-bonus-text').innerText = `收益 x${map.goldMult}`;
+            document.getElementById('location-text').innerText = map.name;
+        },
+
         updateUI() {
-            document.getElementById('realm-text').innerText = CONFIG.realms[state.realmIdx] || "天尊";
+            document.getElementById('realm-text').innerText = CONFIG.realms[state.realmIdx]||"天尊";
             document.getElementById('gold-text').innerText = Math.floor(state.gold);
-            document.getElementById('income-text').innerText = this.getIncomeRate();
-            document.getElementById('auto-exp-text').innerText = state.petLvl * 2;
-            document.getElementById('click-power').innerText = this.getClickPower();
             document.getElementById('exp-text').innerText = Math.floor(state.exp);
             document.getElementById('max-exp-text').innerText = state.maxExp;
+            document.getElementById('event-timer').innerText = eventTimer;
+            document.getElementById('power-text').innerText = this.getPower();
+            document.getElementById('click-val-disp').innerText = this.getClickPower();
             
-            const tEl = document.getElementById('event-timer');
-            tEl.innerText = eventTimer;
-            tEl.style.color = eventTimer <= 5 ? 'red' : '#aaa';
-
-            let chance = Math.max(0.1, 1.0 - (state.realmIdx * 0.1)) + state.luckBonus;
-            document.getElementById('chance-text').innerText = Math.min(100, Math.floor(chance * 100)) + "%";
-            const pct = Math.min(100, (state.exp / state.maxExp) * 100);
+            const pct = Math.min(100, (state.exp/state.maxExp)*100);
             document.getElementById('exp-bar').style.width = pct + "%";
-            document.getElementById('amulet-status').style.display = state.hasAmulet ? 'block' : 'none';
+            document.getElementById('chance-text').innerText = Math.min(100,Math.floor((Math.max(0.1, 1.0-(state.realmIdx*0.1))+state.luckBonus)*100))+"%";
+            document.getElementById('amulet-status').style.display=state.hasAmulet?'block':'none';
+
+            const map = MAPS[state.curMapId];
+            document.getElementById('income-text').innerText = (this.getIncomeRate() * map.goldMult).toFixed(1);
+            document.getElementById('map-mult-text').innerText = `x${map.goldMult}`;
             
             const btns = document.querySelectorAll('.btn-buy');
-            MARKET_ITEMS.forEach((item, idx) => {
-                if (btns[idx]) {
-                    let cost = item.cost;
-                    if(item.type === 'upgrade') cost = Math.floor(item.baseCost * Math.pow(item.costMult, item.getVal(state) - 1));
+            MARKET_ITEMS.forEach((i,idx)=>{
+                if(btns[idx]) {
+                    let cost = i.cost || Math.floor(i.base*Math.pow(i.mult, i.val(state)-1));
                     btns[idx].disabled = state.gold < cost;
                 }
             });
         },
-
-        save() { state.lastSave = Date.now(); localStorage.setItem('xiuxian_v7', JSON.stringify(state)); },
-        load() { const d = localStorage.getItem('xiuxian_v7'); if (d) state = { ...state, ...JSON.parse(d) }; }
+        
+        calcOffline() {
+            const dt = Math.floor((Date.now()-state.lastSave)/1000);
+            if(dt>10) {
+                const baseInc = this.getIncomeRate();
+                state.gold += dt * baseInc;
+                const petExp = dt * (state.petLvl*2);
+                if(petExp>0) this.addExp(petExp);
+                ui.log(`离线${dt}秒，自动收益灵石${dt*baseInc}` + (petExp?`，修为${petExp}`:''), "c-exp");
+            }
+        },
+        save(){ state.lastSave=Date.now(); localStorage.setItem('xiuxian_v9', JSON.stringify(state)); },
+        load(){ const d=localStorage.getItem('xiuxian_v9'); if(d) state={...state,...JSON.parse(d)}; }
     };
 
     const ui = {
-        switchTab(tab, el) {
-            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-            document.querySelectorAll('.view-content').forEach(e => e.classList.add('hidden'));
-            document.getElementById('view-' + tab).classList.remove('hidden');
+        switchTab(t,e){
+            document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); e.classList.add('active');
+            document.querySelectorAll('.view-content').forEach(x=>x.classList.add('hidden')); document.getElementById('view-'+t).classList.remove('hidden');
         },
-        log(msg, cls) {
-            const box = document.getElementById('log-container');
-            const div = document.createElement('div');
-            const time = new Date().toLocaleTimeString('zh-CN',{hour12:false});
-            div.innerHTML = `<span class="log-time">[${time}]</span> <span class="${cls || ''}">${msg}</span>`;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
+        log(m,c){
+            const b=document.getElementById('log-container'); const d=document.createElement('div');
+            d.innerHTML=`<span class="log-time">[${new Date().toLocaleTimeString('zh-CN',{hour12:false})}]</span><span class="${c||''}">${m}</span>`;
+            b.appendChild(d); b.scrollTop=b.scrollHeight;
         },
-        showFloatingText(x, y, text) {
-            const el = document.createElement('div');
-            el.className = 'floating-text';
-            el.innerText = text;
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1000);
+        showFloatingText(x,y,t){
+            const e=document.createElement('div'); e.className='floating-text'; e.innerText=t;
+            e.style.left=x+'px'; e.style.top=y+'px'; document.body.appendChild(e); setTimeout(()=>e.remove(),800);
         }
     };
 
