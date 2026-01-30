@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>灵石修仙传 - 洞府重修版</title>
+    <title>灵石修仙传 - 飞剑降世版</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -86,6 +86,18 @@
         .map-btn.active { background: var(--green); color: #000; border-color: var(--green); cursor: default; }
         .map-btn.locked { opacity: 0.5; cursor: not-allowed; background: #222; }
 
+        /* Inventory Styles */
+        .item-slot {
+            background: #252525; border: 1px solid #444; padding: 12px; border-radius: 6px;
+            display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+            transition: all 0.2s; margin-bottom: 8px;
+        }
+        .item-slot:hover { border-color: var(--gold); background: #333; transform: translateX(5px); }
+        .quality-common { color: #ccc; }
+        .quality-rare { color: var(--blue); }
+        .quality-epic { color: var(--purple); }
+        .quality-legendary { color: var(--gold); text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+
         /* Market & General */
         .market-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .item-card { background: var(--card-bg); border: 1px solid #333; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; min-height: 100px; }
@@ -122,7 +134,6 @@
 <div class="app-container">
     
     <div class="top-section">
-        <!-- 左侧状态栏 -->
         <div class="status-panel">
             <div class="header">道友面板</div>
             <div class="stat-row"><span>境界</span> <span id="realm-text" style="color:var(--purple); font-weight:bold;">凡人</span></div>
@@ -131,7 +142,7 @@
             <div style="height:1px; background:#333; margin:10px 0;"></div>
             
             <div class="stat-row"><span>当前位置</span> <span id="location-text" style="color:var(--blue)">闭关洞府</span></div>
-            <div class="stat-row" title="境界+心法"><span>战斗力</span> <span id="power-text" style="color:var(--red); font-weight:bold;">1</span></div>
+            <div class="stat-row" title="境界+心法+装备"><span>战斗力</span> <span id="power-text" style="color:var(--red); font-weight:bold;">1</span></div>
 
             <div style="margin-top:10px; font-size:12px; color:#aaa;">
                 <div class="stat-row"><span>聚灵产出</span> <span><span id="income-text">0</span> /s</span></div>
@@ -155,15 +166,14 @@
             </button>
         </div>
 
-        <!-- 右侧主界面 -->
         <div class="main-panel">
             <div class="nav-tabs">
                 <div class="nav-item active" onclick="ui.switchTab('home', this)">修炼</div>
                 <div class="nav-item" onclick="ui.switchTab('map', this)">历练</div>
+                <div class="nav-item" onclick="ui.switchTab('inventory', this)">背包</div>
                 <div class="nav-item" onclick="ui.switchTab('market', this)">坊市</div>
             </div>
 
-            <!-- Tab 1: 修练 (Home - Active Clicking) -->
             <div id="view-home" class="view-content">
                 <div style="text-align:center; color:#888; margin-bottom:10px; font-size:13px;">
                     “万般皆下品，唯有修仙高。”<br>
@@ -175,7 +185,6 @@
                         机缘倒计时: <span id="event-timer" style="color:var(--red)">30</span>s
                     </div>
                     
-                    <!-- 核心点击区域 -->
                     <div class="spirit-orb" onmousedown="game.manualCultivate(event)">道</div>
                     
                     <div style="margin-top:40px; color:#555; font-size:12px;">
@@ -184,9 +193,7 @@
                 </div>
             </div>
 
-            <!-- Tab 2: 历练 (Map - Idle Strategy) -->
             <div id="view-map" class="view-content hidden">
-                <!-- 当前地图状态条 -->
                 <div id="cur-map-banner" class="current-map-banner bg-map-0">
                     <div>
                         <div style="font-size:12px; color:#ccc;">正在游历</div>
@@ -199,29 +206,39 @@
                 </div>
 
                 <h4 style="margin:0 0 10px 0; color:#888; border-bottom:1px solid #333; padding-bottom:5px;">选择历练地点</h4>
-                <div class="map-grid" id="map-list">
-                    <!-- JS 生成地图列表 -->
-                </div>
+                <div class="map-grid" id="map-list"></div>
                 
                 <div style="margin-top:20px; font-size:12px; color:#666; line-height:1.5;">
-                    <span style="color:var(--red)">*注意*</span>：若战力不足强行进入危险区域，会遭遇妖兽袭击并被强制送回，且损失灵石。
+                    <span style="color:var(--red)">*注意*</span>：若战力不足强行进入危险区域，会遭遇妖兽袭击并被强制送回，且损失灵石。危险区域有机会掉落<span style="color:var(--purple)">装备</span>。
                 </div>
             </div>
 
-            <!-- Tab 3: 坊市 (Market) -->
+            <div id="view-inventory" class="view-content hidden">
+                <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
+                    <div style="font-size:12px; color:#aaa; margin-bottom:5px;">当前装备</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:16px; font-weight:bold;" id="equipped-weapon-name">无</div>
+                        <div style="color:var(--red); font-weight:bold;" id="equipped-weapon-power"></div>
+                    </div>
+                </div>
+
+                <div class="header">储物袋 <span style="font-size:12px; color:#666; font-weight:normal;">(点击穿戴)</span></div>
+                <div id="inventory-list">
+                    <div style="text-align:center; color:#555; margin-top:50px;">空空如也</div>
+                </div>
+            </div>
+
             <div id="view-market" class="view-content hidden">
                 <div class="market-grid" id="market-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- 底部日志 -->
     <div class="log-panel">
         <div class="log-container" id="log-container"></div>
     </div>
 </div>
 
-<!-- 随机事件弹窗 -->
 <div id="event-modal">
     <div class="modal-content">
         <h2 style="color:var(--red); margin-top:0;" id="modal-title">奇遇</h2>
@@ -239,15 +256,28 @@
 
     const MAPS = [
         { id: 0, name: "闭关洞府", req: 0, desc: "绝对安全之地。", goldMult: 1.0, autoExp: 0, risk: 0 },
-        { id: 1, name: "后山外围", req: 1, desc: "灵气稍浓，偶有野兽。", goldMult: 1.5, autoExp: 2, risk: 0.05, powerReq: 5 },
-        { id: 2, name: "幽冥鬼林", req: 4, desc: "妖气弥漫，宝物众多。", goldMult: 3.0, autoExp: 10, risk: 0.15, powerReq: 25 },
-        { id: 3, name: "上古战场", req: 6, desc: "大能陨落之地，九死一生。", goldMult: 6.0, autoExp: 50, risk: 0.3, powerReq: 100 }
+        { id: 1, name: "后山外围", req: 1, desc: "灵气稍浓，偶有野兽。", goldMult: 1.5, autoExp: 2, risk: 0.05, powerReq: 10 },
+        { id: 2, name: "幽冥鬼林", req: 4, desc: "妖气弥漫，宝物众多。", goldMult: 3.0, autoExp: 10, risk: 0.15, powerReq: 50 },
+        { id: 3, name: "上古战场", req: 6, desc: "大能陨落之地，九死一生。", goldMult: 6.0, autoExp: 50, risk: 0.3, powerReq: 200 }
     ];
+
+    // 掉落物品库
+    const ITEMS = {
+        weapon: [
+            { id: 'w1', name: '生锈铁剑', power: 5, dropRate: 0.2, quality: 'common' },
+            { id: 'w2', name: '精钢长剑', power: 15, dropRate: 0.1, quality: 'common' },
+            { id: 'w3', name: '寒冰刃', power: 40, dropRate: 0.05, quality: 'rare' },
+            { id: 'w4', name: '紫青双剑', power: 120, dropRate: 0.02, quality: 'epic' },
+            { id: 'w5', name: '轩辕神剑', power: 500, dropRate: 0.005, quality: 'legendary' }
+        ]
+    };
 
     const defaultState = {
         gold: 0, exp: 0, maxExp: 100, realmIdx: 0, lastSave: Date.now(),
         incomeLvl: 1, clickLvl: 1, petLvl: 0, hasAmulet: false, luckBonus: 0,
-        curMapId: 0
+        curMapId: 0,
+        inventory: [], // 背包
+        weapon: null   // 当前武器
     };
 
     let state = { ...defaultState };
@@ -281,11 +311,12 @@
             this.calcOffline();
             this.renderMaps();
             this.renderMarket();
+            this.renderInventory(); // 初始化背包
             this.updateMapBanner();
             this.updateUI();
             setInterval(() => this.tick(), 1000);
             setInterval(() => this.save(), 10000);
-            ui.log("欢迎道友！在【修炼】页点击灵球，在【历练】页选择挂机地图。");
+            ui.log("欢迎道友！前往危险区域历练可获得强力飞剑！");
         },
 
         tick() {
@@ -308,6 +339,21 @@
             this.updateUI();
         },
 
+        // 掉落检测逻辑
+        checkDrop(mapId) {
+            if(mapId === 0) return null;
+            const roll = Math.random();
+            for(let w of ITEMS.weapon) {
+                // 地图等级越高(mapId大)，稀有物品掉落率微调
+                let rate = w.dropRate;
+                if (mapId >= 2 && w.quality !== 'common') rate *= 1.5; // 高级地图加成
+                if (roll < rate) {
+                    return { ...w, uuid: Date.now() + Math.random() }; // 生成唯一物品
+                }
+            }
+            return null;
+        },
+
         triggerCombat(map) {
             const playerPower = this.getPower();
             const mobPower = Math.floor(map.powerReq * (0.8 + Math.random() * 0.4));
@@ -317,7 +363,20 @@
                 const rewardExp = Math.floor(mobPower * 1.5);
                 state.gold += rewardGold;
                 this.addExp(rewardExp);
-                ui.log(`遭遇妖兽(战力${mobPower})，轻松斩杀！获灵石${rewardGold}，修为${rewardExp}`, "c-gold");
+                
+                // 战斗胜利检查掉落
+                const drop = this.checkDrop(map.id);
+                if (drop) {
+                    state.inventory.push(drop);
+                    ui.log(`斩杀妖兽！竟然掉落了 <span class="quality-${drop.quality}">[${drop.name}]</span>！`, "c-safe");
+                    this.renderInventory();
+                    // 添加红点提示效果
+                    const invTab = document.querySelector('.nav-item:nth-child(3)');
+                    if(!invTab.classList.contains('active')) invTab.style.color = '#69f0ae';
+                } else {
+                    ui.log(`击败妖兽(战力${mobPower})，获灵石${rewardGold}，修为${rewardExp}`, "c-gold");
+                }
+
             } else {
                 state.curMapId = 0; // 回城
                 const loss = Math.floor(state.gold * 0.1);
@@ -328,7 +387,11 @@
             }
         },
 
-        getPower() { return (state.realmIdx + 1) * 5 + (state.clickLvl * 2); },
+        getPower() { 
+            let base = (state.realmIdx + 1) * 5 + (state.clickLvl * 2);
+            if (state.weapon) base += state.weapon.power;
+            return base;
+        },
         getIncomeRate() { return 1 + Math.floor((state.incomeLvl - 1) * 1.5); },
         getClickPower() { return 1 + Math.floor(state.realmIdx * 1.5) + (state.clickLvl - 1) * 2; },
 
@@ -348,7 +411,6 @@
         manualCultivate(e) {
             const gain = this.getClickPower();
             this.addExp(gain);
-            // 简单的防抖动，防止点击太快事件对象位置不准
             let x = e ? e.clientX : window.innerWidth/2;
             let y = e ? e.clientY : window.innerHeight/2;
             ui.showFloatingText(x, y, `+${gain} 修为`);
@@ -405,6 +467,49 @@
                 c.appendChild(b);
             });
             m.style.display="flex";
+        },
+
+        // 渲染背包
+        renderInventory() {
+            const el = document.getElementById('inventory-list');
+            if(state.inventory.length === 0) {
+                el.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">空空如也</div>';
+                return;
+            }
+            el.innerHTML = state.inventory.map((item, index) => `
+                <div class="item-slot quality-${item.quality}" onclick="game.equipItem(${index})">
+                    <div style="font-weight:bold;">${item.name}</div>
+                    <div style="font-size:12px;">战力 +${item.power}</div>
+                </div>
+            `).join('');
+            
+            this.updateWeaponUI();
+        },
+
+        updateWeaponUI() {
+            const wName = document.getElementById('equipped-weapon-name');
+            const wPow = document.getElementById('equipped-weapon-power');
+            if(state.weapon) {
+                wName.innerHTML = `<span class="quality-${state.weapon.quality}">${state.weapon.name}</span>`;
+                wPow.innerText = `+${state.weapon.power} 战力`;
+            } else {
+                wName.innerText = "无";
+                wPow.innerText = "";
+            }
+        },
+
+        // 装备物品
+        equipItem(index) {
+            const item = state.inventory[index];
+            if(state.weapon) {
+                state.inventory.push(state.weapon); // 卸下当前装备
+            }
+            state.weapon = item;
+            state.inventory.splice(index, 1); // 从背包移除
+            
+            ui.log(`装备了 [${item.name}]，战力大增！`, "c-gold");
+            this.renderInventory();
+            this.updateUI();
         },
 
         renderMaps() {
@@ -485,13 +590,14 @@
                 ui.log(`离线${dt}秒，自动收益灵石${dt*baseInc}` + (petExp?`，修为${petExp}`:''), "c-exp");
             }
         },
-        save(){ state.lastSave=Date.now(); localStorage.setItem('xiuxian_v9', JSON.stringify(state)); },
-        load(){ const d=localStorage.getItem('xiuxian_v9'); if(d) state={...state,...JSON.parse(d)}; }
+        save(){ state.lastSave=Date.now(); localStorage.setItem('xiuxian_v10', JSON.stringify(state)); }, // Version updated to v10
+        load(){ const d=localStorage.getItem('xiuxian_v10'); if(d) state={...state,...JSON.parse(d)}; }
     };
 
     const ui = {
         switchTab(t,e){
             document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); e.classList.add('active');
+            e.style.color = ''; // Remove highlight if any
             document.querySelectorAll('.view-content').forEach(x=>x.classList.add('hidden')); document.getElementById('view-'+t).classList.remove('hidden');
         },
         log(m,c){
